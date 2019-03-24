@@ -1,46 +1,23 @@
 import React from 'react';
 import ApolloClient from "apollo-boost";
-import gql from "graphql-tag";
-import { ApolloProvider, Query } from "react-apollo";
+import { ApolloProvider } from "react-apollo";
+import { HttpLink } from 'apollo-link-http';
+import Messanger from './frontend/components/Messanger';
+import { InMemoryCache } from 'apollo-cache-inmemory';
 
+const httpLink = new HttpLink({ uri: 'http://localhost:3000/graphql' })
 
 const client = new ApolloClient({
-  uri: "https://48p1r2roz4.sse.codesandbox.io"
+  link: httpLink,
+  cache: new InMemoryCache(),
 });
-
-const ExchangeRates = () => (
-  <Query
-    query={gql`
-      {
-        rates(currency: "USD") {
-          currency
-          rate
-        }
-      }
-    `}
-  >
-    {({ loading, error, data }) => {
-      console.log(data);
-      if (loading) return <p>Loading...</p>;
-      if (error) return <p>Error :(</p>;
-
-      return data.rates.map(({ currency, rate }) => (
-        <div key={currency}>
-          <p>
-            {currency}: {rate}
-          </p>
-        </div>
-      ));
-    }}
-  </Query>
-)
 
 const App = () => {
   return (
     <ApolloProvider client={client}>
       <div>
         <center><h1>hello world</h1></center>
-        <ExchangeRates />
+        <Messanger />
       </div>
     </ApolloProvider>    
   );
