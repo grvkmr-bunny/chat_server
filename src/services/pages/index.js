@@ -1,2 +1,2 @@
 export { HomePage } from './HomePage';
-export { CreateUser } from './components';
+export * from './components';

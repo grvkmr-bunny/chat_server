@@ -9,9 +9,9 @@ class HomePage extends React.Component {
 
   render() {
     return (
-      <div style={ { display: 'flex', flexDirection: 'column' }}>
-        <span style={{ color: 'black', fontSize: '25px', marginBottom: '50px'}}>
-          <h1>Welcome To My Chat App</h1>
+      <div style={ { display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <span style={{ color: 'black', fontSize: '25px', marginBottom: '50px' }}>
+          <h1>Welcome to Chat App</h1>
           <hr/>
         </span>
         <CreateUser />

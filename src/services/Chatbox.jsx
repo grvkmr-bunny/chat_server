@@ -1,5 +1,4 @@
 import React from 'react';
-// import './Chatbox.css'
 
 const Chatbox = ({message}) => (
 	<div className="chat-box">
