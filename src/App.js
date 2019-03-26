@@ -1,45 +1,18 @@
 import React from 'react';
-import { ApolloClient } from "apollo-client";
-import { ApolloProvider } from "react-apollo";
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import HomePage from './services/pages/HomePage/HomePage';
-import { WebSocketLink } from 'apollo-link-ws';
-import { HttpLink } from 'apollo-link-http';
-import { getMainDefinition } from 'apollo-utilities';
-import { split } from 'apollo-link';
-
-const wsLink = new WebSocketLink({
-  uri: `ws://localhost:5000/graphql`,
-  options: {
-    reconnect: true
-  }
-});
-
-const httpLink = new HttpLink({ 
-  uri: 'http://localhost:5000/graphql'
-})
-
-const link = split(
-  ({ query }) => {
-    const { kind, operation } = getMainDefinition(query);
-    return kind === 'OperationDefinition' && operation === 'subscription';
-  },
-  wsLink,
-  httpLink,
-);
-
-const client = new ApolloClient({
-  link,
-  cache: new InMemoryCache(),
-});
+import { BrowserRouter as Router, Switch } from 'react-router-dom';
+import { PrivateRoute } from './routes';
+import { AvailableUsers, NoMatch, HomePage, Messanger } from './pages';
 
 const App = () => {
   return (
-    <ApolloProvider client={client}>
-      <div>
-        <HomePage />
-      </div>
-    </ApolloProvider>    
+    <Router>
+      <Switch>
+        <PrivateRoute exact path="/" component={HomePage} />
+        <PrivateRoute exact path="/users" component={AvailableUsers} />
+        <PrivateRoute exact path="/users/:id" component={Messanger} />
+        <PrivateRoute component={NoMatch} />
+      </Switch>
+    </Router>       
   );
 }
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Route, Redirect } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -7,7 +8,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
-import MessageSender from '../../../frontend/components/MessageSender';
 
 const ADD_USER = gql`
   mutation AddUser($name: String!, $email: String!) {
@@ -40,7 +40,6 @@ export default class CreateUser extends React.Component {
 
   handleSubmit = (addUser) => {
     const { name, email } = this.state;
-    console.log('54564534', name, email);
     addUser({ variables: { name, email }});
     this.handleClose();
   }  
@@ -102,7 +101,7 @@ export default class CreateUser extends React.Component {
               </Mutation>
             </DialogActions>
           </Dialog>
-          {showData ? <MessageSender /> : ''}
+          {showData ?  <Route><Redirect to="/users" /></Route> : ''}
         </div>
     );
   }

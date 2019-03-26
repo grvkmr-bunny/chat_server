@@ -10,18 +10,14 @@ import Paper from '@material-ui/core/Paper';
 
 const styles = theme => ({
   root: {
-    width: '100%',
-    marginTop: theme.spacing.unit * 3,
+    width: '50%',
+    marginTop: theme.spacing.unit,
     overflowX: 'auto',
+    elevation: 5,
   },
   table: {
-    minWidth: 700,
+    minWidth: 600,
     fontFamily: theme.typography.fontFamily,
-  },
-  flexContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    boxSizing: 'border-box',
   },
   tableRow: {
     cursor: 'pointer',
@@ -43,17 +39,17 @@ const styles = theme => ({
 class TableComponent extends Component {
 
   componentDidMount() {
-    this.props.subscribeToNewUsers();
+    this.props.subscribeToMore();
   }
 
   tableBody = (data) => {
     const { classes, onSelect } = this.props;
     return data.getAllUser.map(dataItem => (
       <TableRow
-        key={dataItem._id}
+        key={dataItem.id}
         className={classes.tableRow}
       >
-        <TableCell align='center' onClick={() => onSelect(dataItem._id)}>
+        <TableCell align='center' onClick={() => onSelect(dataItem.id)}>
           {dataItem.name}
         </TableCell>
       </TableRow>
@@ -67,11 +63,17 @@ class TableComponent extends Component {
     } = this.props;
     return (
       <>
-        <Paper className={classes.root}>
-          <Table className={classes.table}>
-            <TableBody>{this.tableBody(data)}</TableBody>
-          </Table>
-        </Paper>
+        <div style={ { display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span style={{ color: 'black', fontSize: '25px', marginBottom: '50px' }}>
+            <h2>Available Users</h2>
+            <hr/>
+          </span>
+          <Paper className={classes.root}>
+            <Table className={classes.table}>
+              <TableBody>{this.tableBody(data)}</TableBody>
+            </Table>
+          </Paper>
+      </div>
       </>
     );
   }
@@ -81,6 +83,6 @@ TableComponent.propTypes = {
   data: PropTypes.arrayOf.isRequired,
   onSelect: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
-  subscribeToNewUsers: PropTypes.func.isRequired,
+  subscribeToMore: PropTypes.func.isRequired,
 };
 export default withStyles(styles)(TableComponent);

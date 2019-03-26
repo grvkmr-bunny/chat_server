@@ -26,8 +26,8 @@ const ApolloMessage = () => (
         if (error) return <p>Error :(</p>;
   
         return data.message.map(({ text, id, user }) => (
-          <ListItem key={id} primaryText />
-          <div style={{float: "left", clear: "both"}} ref={ref => this.end = ref} />
+          // <ListItem key={id} primaryText />
+          // <div style={{float: "left", clear: "both"}} ref={ref => this.end = ref} />
         )
         );
       }}
