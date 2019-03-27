@@ -12,6 +12,7 @@ import { Mutation } from "react-apollo";
 const ADD_USER = gql`
   mutation AddUser($name: String!, $email: String!) {
     addUser(name: $name, email: $email) {
+      id
       name
       email
     }
@@ -40,6 +41,8 @@ export default class CreateUser extends React.Component {
 
   handleSubmit = (addUser) => {
     const { name, email } = this.state;
+    let value = [name, email]
+    localStorage.setItem("loginUser", JSON.stringify(value));
     addUser({ variables: { name, email }});
     this.handleClose();
   }  

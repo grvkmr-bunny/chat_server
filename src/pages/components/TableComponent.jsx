@@ -43,29 +43,35 @@ class TableComponent extends Component {
   }
 
   tableBody = (data) => {
-    const { classes, onSelect } = this.props;
-    return data.getAllUser.map(dataItem => (
-      <TableRow
-        key={dataItem.id}
-        className={classes.tableRow}
-      >
-        <TableCell align='center' onClick={() => onSelect(dataItem.id)}>
-          {dataItem.name}
-        </TableCell>
-      </TableRow>
-    ));
+    const { classes, onSelect, loginData } = this.props;
+    return data.getAllUser.map(dataItem => {
+      if (dataItem.name !== loginData[0]) {
+        return (
+          <TableRow
+            key={dataItem.id}
+            className={classes.tableRow}
+          >
+            <TableCell align='center' onClick={() => onSelect(dataItem.id)}>
+              {dataItem.name}
+            </TableCell>
+          </TableRow>
+        )
+      }
+      return '';
+    });
   };
 
   render() {
     const {
       classes,
       data,
+      loginData
     } = this.props;
     return (
       <>
         <div style={ { display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span style={{ color: 'black', fontSize: '25px', marginBottom: '50px' }}>
-            <h2>Available Users</h2>
+            <h2>Welcome {loginData[0]}</h2>
             <hr/>
           </span>
           <Paper className={classes.root}>
@@ -84,5 +90,6 @@ TableComponent.propTypes = {
   onSelect: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   subscribeToMore: PropTypes.func.isRequired,
+  loginData: PropTypes.func.isRequired,
 };
 export default withStyles(styles)(TableComponent);
