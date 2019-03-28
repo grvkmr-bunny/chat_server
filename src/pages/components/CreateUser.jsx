@@ -1,6 +1,8 @@
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
+import * as yup from 'yup';
+import { SnackBarContextConsumer } from '../SnackBarProvider/SnackBarProvider';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -18,12 +20,26 @@ const ADD_USER = gql`
     }
   }
 `;
-export default class CreateUser extends React.Component {
+
+class CreateUser extends React.Component {
+  schema = yup.object().shape({
+    name: yup.string().required('Name is a required field'),
+    email: yup.string().required('Email Address is a required field').email('Email Address must be a valid email'),
+  });
+
   state = {
     open: false,
+    showData: false,
     name: '',
     email: '',
-    showData: false,
+    error: {
+      name: '',
+      email: '',
+    },
+    touched: {
+      name: false,
+      email: false,
+    },
   };
 
   handleClickOpen = () => {
@@ -35,77 +51,160 @@ export default class CreateUser extends React.Component {
       open: false,
       name: '',
       email: '',
+      touched: {
+        name: false,
+        email: false,
+      },
+    });
+  }  
+
+  handleSubmit = (e, addUser, openSnackBar) => {
+    e.preventDefault();
+    const { name, email } = this.state;
+    addUser({ variables: { name, email }});
+    openSnackBar('Data created successfully!', 'success');
+    this.handleClose();
+    this.setState({
       showData: true,
     });
+
   }  
 
-  handleSubmit = (addUser) => {
-    const { name, email } = this.state;
-    let value = [name, email]
-    localStorage.setItem("loginUser", JSON.stringify(value));
-    addUser({ variables: { name, email }});
-    this.handleClose();
-  }  
-
-  handleChange = field => event => {
+  handleChange = field => (event) => {
     this.setState({
       [field]: event.target.value,
+    }, this.validateForm);
+  }
+
+  validateForm = () => {
+    const {
+      name,
+      email,
+    } = this.state;
+    this.schema
+      .validate({
+        name, email,
+      }, { abortEarly: false })
+      .then(() => {
+        this.handleError(null);
+      })
+      .catch((err) => {
+        this.handleError(err);
+      });
+  }
+
+  handleError = (err) => {
+    const focussederror = {};
+    if (err) {
+      err.inner.forEach((element) => {
+        focussederror[element.path] = element.message;
+      });
+    }
+    this.setState({
+      error: focussederror,
     });
-  };
+  }
+
+  isTouched = field => () => {
+    const {
+      touched,
+    } = this.state;
+    this.setState({
+      touched: { ...touched, [field]: true },
+    }, this.validateForm);
+  }
+
+  hasError = () => {
+    const {
+      error,
+      touched,
+    } = this.state;
+    if (!Object.values(error).some(item => item)
+    && Object.values(touched).some(item => item)
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  getError = (field) => {
+    const {
+      touched, error,
+    } = this.state;
+    if (!touched[field]) {
+      return '';
+    }
+    return error[field];
+  }
 
   render() {
     const { open, name, email, showData } = this.state;
     return (
-        <div>
-          <Button align="center" onClick={this.handleClickOpen} variant="contained" color="primary">
-            Start
-          </Button>
-          <Dialog
-            open={open}
-            onClose={this.handleClose}
-            aria-labelledby="form-dialog-title"
-          >
-            <DialogTitle id="form-dialog-title"> Enter your details:</DialogTitle>
-            <DialogContent>
-              <TextField
-                required
-                fullWidth
-                id="outlined-name"
-                label="Name"
-                value={name}
-                onChange={this.handleChange('name')}
-                margin="normal"
-                variant="outlined"
-              />
-              <TextField
-                required
-                fullWidth
-                id="outlined-email"
-                label="Email"
-                value={email}
-                onChange={this.handleChange('email')}
-                margin="normal"
-                variant="outlined"
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button variant='contained' onClick={this.handleClose} color="primary">
-                Cancel
-              </Button>
+      <div>
+        <Button align="center" onClick={this.handleClickOpen} variant="contained" color="primary">
+          Start
+        </Button>
+        <Dialog
+          open={open}
+          onClose={this.handleClose}
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title"> Enter your details:</DialogTitle>
+          <DialogContent>
+            <TextField
+              required
+              fullWidth
+              id="outlined-name"
+              label="Name"
+              name="name"
+              value={name}
+              margin="normal"
+              variant="outlined"
+              error={this.getError('name')}
+              helperText={this.getError('name')}
+              onChange={this.handleChange('name')}
+              onBlur={this.isTouched('name')}
+            />
+            <TextField
+              required
+              fullWidth
+              id="outlined-email"
+              label="Email"
+              name="email"
+              value={email}
+              margin="normal"
+              variant="outlined"
+              error={this.getError('email')}
+              helperText={this.getError('email')}
+              onChange={this.handleChange('email')}
+              onBlur={this.isTouched('email')}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button variant='contained' onClick={this.handleClose} color="primary">
+              Cancel
+            </Button>
               <Mutation mutation={ADD_USER}>
-              {(addUser, { data }) => (
-              <Button variant='contained' 
-                onClick={() => this.handleSubmit(addUser)}
-                color="primary"
-              >
-                Create
-              </Button>
-              )}
+                {(addUser) => (
+                  <SnackBarContextConsumer>
+                    {({ openSnackBar }) => (
+                      <Button variant='contained' 
+                        onClick={(e) => {this.handleSubmit(e, addUser, openSnackBar)}}
+                        color="primary"
+                        disabled={this.hasError()}
+                      >
+                        Create
+                      </Button>
+                    )}
+                  </SnackBarContextConsumer>
+                )}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
               </Mutation>
-            </DialogActions>
-          </Dialog>
-          {showData ?  <Route><Redirect to="/users" /></Route> : ''}
-        </div>
+          </DialogActions>
+        </Dialog>
+        {showData ?  <Route><Redirect to="/users" /></Route> : ''}
+      </div>
     );
   }
 }
+
+export default CreateUser;

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Messanger } from  './index'
 
 const GET_MESSAGE = gql`
-  query GetMessage($sender: String!, $receiver: ID!) {
+  query GetMessage($sender: ID!, $receiver: ID!) {
     getMessage(sender: $sender, receiver: $receiver) {
       id
       text
@@ -16,8 +16,8 @@ const GET_MESSAGE = gql`
 `;
 
 const MESSAGE_SUBSCRIPTION = gql`
-  subscription {
-    messageSend{
+  subscription MessageSend($sender: ID!, $receiver: ID!) {
+    messageSend(sender: $sender, receiver: $receiver) {
       id
       text
       sender
@@ -36,11 +36,11 @@ class AvailableMessage extends Component {
   render() {
     const { match } =   this.props;
     const receiverId = match.params.id;
-    const senderEmail = JSON.parse(localStorage.getItem("loginUser"))[1];
+    const senderID = JSON.parse(localStorage.getItem("loginUser"))[0];
     return (
       <Query
         query={GET_MESSAGE}
-        variables={{sender: senderEmail, receiver: receiverId}}
+        variables={{sender: senderID, receiver: receiverId}}
       >
         {({ subscribeToMore, loading, error, data }) => {
           if (loading) return <p>Loading...</p>;
@@ -48,6 +48,7 @@ class AvailableMessage extends Component {
           if (!unsubscribe) {
             unsubscribe = subscribeToMore ({
               document: MESSAGE_SUBSCRIPTION,
+              variables: { sender: senderID, receiver: receiverId },
               updateQuery: (prev, { subscriptionData }) => {
                 if (!subscriptionData.data) return prev;
                 const newData = subscriptionData.data;
@@ -63,7 +64,7 @@ class AvailableMessage extends Component {
               id="id"
               match={match}
               subscribeToMore={() => unsubscribe}
-              data={data.getMessage}
+              // data={data.getMessage}
             />
           )   
         }}
