@@ -97,6 +97,7 @@ class AvailableUsers extends Component {
               <ChatDialog
                 maxWidth="xl"
                 open={open}
+                
                 onClose={this.handleClose}
               />
             </>
