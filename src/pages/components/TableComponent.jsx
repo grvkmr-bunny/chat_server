@@ -51,7 +51,7 @@ class TableComponent extends Component {
             key={dataItem.id}
             className={classes.tableRow}
           >
-            <TableCell align='center' onClick={() => onSelect(dataItem.id)}>
+            <TableCell align='center' onClick={() => onSelect(dataItem.id, dataItem.name)}>
               {dataItem.name}
             </TableCell>
           </TableRow>
@@ -67,6 +67,7 @@ class TableComponent extends Component {
       data,
       loginData
     } = this.props;
+    console.log('inside table', data.getAllUser)
     return (
       <>
         <div style={ { display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

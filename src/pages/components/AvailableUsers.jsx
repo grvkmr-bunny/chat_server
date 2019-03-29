@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
 import green from '@material-ui/core/colors/green';
-import { TableComponent, ChatDialog } from  './index'
+import { TableComponent, Messanger } from  './index'
 
 const GET_USERS = gql`
   {
@@ -27,8 +27,6 @@ const USER_SUBSCRIPTION = gql`
   }
 `;
 
-let unsubscribe = null;
-
 const styles = () => ({
   progress: {
     color: green[800],
@@ -39,13 +37,19 @@ const styles = () => ({
 class AvailableUsers extends Component {
   state = {
     open: false,
+    selectData: {
+      id: '',
+      name: '',
+    },
   };
 
-  handleSelect = (id) => {
-    // const { match, history } = this.props;
-    // history.push(`${match.url}/${id}`);
+  handleSelect = (id, name) => {
     this.setState({
       open: true,
+      selectData: {
+        id,
+        name,
+      }
     });
   };
 
@@ -53,11 +57,28 @@ class AvailableUsers extends Component {
     this.setState({ 
       open: false,
     });
-  }  
+  }
+
+  suscribeUser = (subscribeToMore) => {
+    subscribeToMore ({
+      document: USER_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+        const newData = subscriptionData.data;
+        const { id, name, email } = newData;
+        let value = [id, name, email]
+        localStorage.setItem("loginUser", JSON.stringify(value));
+        return {
+          ...prev,
+          getAllUser: [...prev.getAllUser, newData.userAdded]
+        };
+      }
+    });  
+  }
 
   render() {
     const { classes } = this.props;
-    const { open } = this.state;
+    const { selectData, open } = this.state;
     return (
       <Query
         query={GET_USERS}
@@ -68,52 +89,30 @@ class AvailableUsers extends Component {
           const { id, name, email } = data.getAllUser[data.getAllUser.length-1];
           let value = [id, name, email]
           localStorage.setItem("loginUser", JSON.stringify(value));
-          if (!unsubscribe) {
-            unsubscribe = subscribeToMore ({
-              document: USER_SUBSCRIPTION,
-              updateQuery: (prev, { subscriptionData }) => {
-                if (!subscriptionData.data) return prev;
-                const newData = subscriptionData.data;
-                const { id, name, email } = newData;
-                let value = [id, name, email]
-                localStorage.setItem("loginUser", JSON.stringify(value));
-                return {
-                  ...prev,
-                  getAllUser: [...prev.getAllUser, newData.userAdded]
-                };
-              }
-            });
-          }
           let loginData = JSON.parse(localStorage.getItem("loginUser"));
           return (
             <>
               <TableComponent
                 id="id"
-                subscribeToMore={() => unsubscribe}
+                subscribeToMore={() => this.suscribeUser(subscribeToMore)}
                 loginData={loginData}
                 data={data}
                 onSelect={this.handleSelect}
               />
-              <ChatDialog
-                maxWidth="xl"
+              <Messanger 
                 open={open}
-                
+                selectData={selectData}
                 onClose={this.handleClose}
               />
             </>
-          )  
+          )
         }}
       </Query>
     );
   }
 }
 AvailableUsers.propTypes = {
-  match: PropTypes.objectOf,
-  history: PropTypes.objectOf,
   classes: PropTypes.objectOf.isRequired,
-};
-AvailableUsers.defaultProps = {
-  match: {},
-  history: {},
+  open: PropTypes.bool.isRequired,
 };
 export default withStyles(styles)(AvailableUsers);

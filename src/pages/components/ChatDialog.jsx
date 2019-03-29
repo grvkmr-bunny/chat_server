@@ -1,61 +1,49 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import gql from "graphql-tag";
-import { Query, Mutation } from "react-apollo";
-import Button from '@material-ui/core/Button';
-import Paper from '@material-ui/core/Paper';
+import { Mutation } from "react-apollo";
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 import SendIcon from '@material-ui/icons/Send';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import IconButton from '@material-ui/core/IconButton';
 import Fab from '@material-ui/core/Fab';
-import green from '@material-ui/core/colors/green';
-import CircularProgress from '@material-ui/core/CircularProgress';
-
-// const styles = () => ({
-//   progress: {
-//     color: green[800],
-//     position: 'absolute',
-//   },
-// });
+import Chip from '@material-ui/core/Chip';
+import Avatar from '@material-ui/core/Avatar';
+import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
   root: {
-    width: '50%',
     marginTop: theme.spacing.unit,
     overflowX: 'auto',
-    elevation: 10,
+    elevation: 0,
+    position: 'relative',
   },
-  details: {
-    display: 'flex',
-    flexDirection: 'column',
+  chip: {
+    margin: theme.spacing.unit,
   },
   content: {
-    flex: '1 0 auto',
-  },
-  cover: {
-    width: 151,
-  },
-  button: {
-    marginTop: theme.spacing.unit,
-    marginLeft: theme.spacing.unit,
-    align: 'right'
-  },
-  container: {
-    display: 'flex',
-    justifyContent: 'space-between',
     position: 'sticky',
-    margin: theme.spacing.unit,
-    marginTop: theme.spacing.unit * 70,
   },
   textField: {
     marginRight: theme.spacing.unit,
-    flexGrow: 1,
+    position: 'relative',
   },
+  flex: {
+    flex: 1,
+    marginLeft: theme.spacing.unit,
+  },
+  dialogPaper: {
+    minHeight: '55vh',
+    maxHeight: '55vh',
+    minWidth: '40.3vh',
+    maxWidth: '40.3vh',
+  },  
 });
 
 const SEND_MESSAGE = gql`
@@ -68,40 +56,13 @@ const SEND_MESSAGE = gql`
     }
   }
 `;
-
-const GET_MESSAGE = gql`
-  query GetMessage($sender: ID!, $receiver: ID!) {
-    getMessage(sender: $sender, receiver: $receiver) {
-      id
-      text
-      sender
-      receiver
-    }
-  } 
-`;
-
-const MESSAGE_SUBSCRIPTION = gql`
-  subscription MessageSend($sender: ID!, $receiver: ID!) {
-    messageSend(sender: $sender, receiver: $receiver) {
-      id
-      text
-      sender
-      receiver
-    }
-  }
-`;
-
-let unsubscribe = null;
-
-
 class ChatDialog extends Component {
   state = {
     message: '',
   };
 
   componentDidMount() {
-    const { subscribeToMore } = this.props;
-    subscribeToMore && subscribeToMore();
+    this.props.subscribeToMore();
   }
 
   handleChange = field => event => {
@@ -111,11 +72,10 @@ class ChatDialog extends Component {
   };
 
   handleSend = (sendMessage) => {
-    const { match } = this.props;
+    const { selectData } = this.props;
     const { message } = this.state;
-    const receiverId = match.params.id;
     const senderID = JSON.parse(localStorage.getItem("loginUser"))[0];
-    sendMessage({ variables: { text: message, sender: senderID, receiver: receiverId }})
+    sendMessage({ variables: { text: message, sender: senderID, receiver: selectData.id }})
     this.setState({
       message: ''
     });
@@ -125,81 +85,72 @@ class ChatDialog extends Component {
     const {
       open,
       onClose,
-      maxWidth,
+      selectData,
       classes,
-      match,
+      messageData,
     } = this.props;
-    const receiverId = match.params.id;
-    const senderID = JSON.parse(localStorage.getItem("loginUser"))[0];
+    const senderName = JSON.parse(localStorage.getItem("loginUser"))[1];
     return (
-      <Query
-        query={GET_MESSAGE}
-        variables={{sender: senderID, receiver: receiverId}}
-      >
-        {({ subscribeToMore, loading, error, data }) => {
-          if (loading) return <p>Loading...</p>;
-          if (error) return <p>{error.message}</p>;
-          if (!unsubscribe) {
-            unsubscribe = subscribeToMore ({
-              document: MESSAGE_SUBSCRIPTION,
-              variables: { sender: senderID, receiver: receiverId },
-              updateQuery: (prev, { subscriptionData }) => {
-                if (!subscriptionData.data) return prev;
-                const newData = subscriptionData.data;
-                return {
-                  ...prev,
-                  getMessage: [...prev.getMessage, newData.messageSend]
-                };
-              }
-            });
-          }
-          return (  
-            <>
-              <Dialog open={open} onClose={onClose} maxWidth={maxWidth}>
-                <DialogTitle id="alert-dialog-title">My Chat</DialogTitle>
-                <DialogContent>
-                  <DialogContentText id="alert-dialog-description">
-                  <Paper className={classes.root}>
-                    {/* {data.getMessage.map(message => message.text)} */}
-                    
-                  </Paper>
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <div className={classes.container}>
-                    <TextField
-                      id="filled-full-width"
-                      placeholder="Type Message"
-                      value={this.state.message}
-                      name="message"
-                      className={classes.textField}
-                      variant="filled"
-                      onChange={this.handleChange('message')}
-                    />
-                    <Mutation mutation={SEND_MESSAGE}>
-                      {(sendMessage, { data }) => (
-                        <Fab color="primary"
-                          onClick={() => this.handleSend(sendMessage)}
-                        >
-                          <SendIcon />
-                        </Fab>
-                      )}
-                    </Mutation> 
-                  </div>
-                </DialogActions>
-              </Dialog>
-            </>
-          )
-        }}
-      </Query>
+      <>
+        <Dialog open={open} onClose={onClose} classes={{ paper: classes.dialogPaper }}>
+          <AppBar className={classes.content}>
+            <Toolbar>
+              <IconButton color="inherit" onClick={onClose} aria-label="Close">
+                <ArrowBackIcon />
+              </IconButton>
+              <Typography variant="h6" color="inherit" className={classes.flex}>
+                {selectData.name}
+              </Typography>
+            </Toolbar>
+          </AppBar>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              {messageData.getMessage.map(message =>
+                <Chip
+                  avatar={<Avatar>{senderName.toUpperCase()[0]+senderName.toUpperCase()[senderName.length-1]}</Avatar>}
+                  label={message.text}
+                  className={classes.chip}
+                  color="primary"
+                  variant="outlined"
+                />
+              )}
+            </DialogContentText>
+          </DialogContent>
+          <AppBar className={classes.content}>
+            <Toolbar>
+              <TextField
+                id="filled-full-width"
+                placeholder="Type Message"
+                value={this.state.message}
+                
+                name="message"
+                className={classes.textField}
+                // variant="filled"
+                onChange={this.handleChange('message')}
+              />
+              <Mutation mutation={SEND_MESSAGE}>
+                {(sendMessage, { data }) => (
+                  <Fab
+                    onClick={() => this.handleSend(sendMessage)}
+                  >
+                    <SendIcon />
+                  </Fab>
+                )}
+              </Mutation> 
+            </Toolbar>
+          </AppBar>
+        </Dialog>
+      </>
     );
   }
 }
 ChatDialog.propTypes = {
   classes: PropTypes.objectOf.isRequired,
   onClose: PropTypes.func,
-  maxWidth: PropTypes.string.isRequired,
+  messageData: PropTypes.objectOf.isRequired,
   open: PropTypes.bool,
+  subscribeToMore: PropTypes.func.isRequired,
+  selectData: PropTypes.objectOf.isRequired,
 };
 ChatDialog.defaultProps = {
   onClose: () => {},
