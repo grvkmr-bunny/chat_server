@@ -16,6 +16,7 @@ import Fab from '@material-ui/core/Fab';
 import Chip from '@material-ui/core/Chip';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
+import Slide from '@material-ui/core/Slide';
 
 const styles = theme => ({
   root: {
@@ -39,11 +40,19 @@ const styles = theme => ({
     marginLeft: theme.spacing.unit,
   },
   dialogPaper: {
-    minHeight: '55vh',
-    maxHeight: '55vh',
-    minWidth: '40.3vh',
-    maxWidth: '40.3vh',
-  },  
+    // minHeight: '55vh',
+    // maxHeight: '55vh',
+    // minWidth: '40.3vh',
+    // maxWidth: '40.3vh',
+  },
+  chipLeft: {
+    textAlign: "left",
+    margin: theme.spacing.unit,
+  },
+  chipRight: {
+    textAlign: "right",
+    margin: theme.spacing.unit,
+  }
 });
 
 const SEND_MESSAGE = gql`
@@ -56,6 +65,11 @@ const SEND_MESSAGE = gql`
     }
   }
 `;
+
+function Transition(props) {
+  return <Slide direction="up" {...props} />;
+}
+
 class ChatDialog extends Component {
   state = {
     message: '',
@@ -74,7 +88,7 @@ class ChatDialog extends Component {
   handleSend = (sendMessage) => {
     const { selectData } = this.props;
     const { message } = this.state;
-    const senderID = JSON.parse(localStorage.getItem("loginUser"))[0];
+    const senderID = JSON.parse(localStorage.getItem("loginUserID"));
     sendMessage({ variables: { text: message, sender: senderID, receiver: selectData.id }})
     this.setState({
       message: ''
@@ -90,9 +104,16 @@ class ChatDialog extends Component {
       messageData,
     } = this.props;
     const senderName = JSON.parse(localStorage.getItem("loginUser"))[1];
+    const senderId = JSON.parse(localStorage.getItem("loginUser"))[0];
     return (
       <>
-        <Dialog open={open} onClose={onClose} classes={{ paper: classes.dialogPaper }}>
+        <Dialog
+          fullScreen
+          open={open}
+          onClose={onClose}
+          classes={{ paper: classes.dialogPaper }}
+          TransitionComponent={Transition}
+        >
           <AppBar className={classes.content}>
             <Toolbar>
               <IconButton color="inherit" onClick={onClose} aria-label="Close">
@@ -105,15 +126,28 @@ class ChatDialog extends Component {
           </AppBar>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              {messageData.getMessage.map(message =>
-                <Chip
-                  avatar={<Avatar>{senderName.toUpperCase()[0]+senderName.toUpperCase()[senderName.length-1]}</Avatar>}
-                  label={message.text}
-                  className={classes.chip}
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
+              {messageData.getMessage.map(message => {
+                if (message.sender === senderId) {
+                  return (
+                    <Chip
+                      avatar={<Avatar>{senderName.toUpperCase()[0]+senderName.toUpperCase()[senderName.length-1]}</Avatar>}
+                      label={message.text}
+                      color="primary"
+                      variant="outlined"
+                      className={classes.chipRight}
+                    />
+                  )
+                }
+                return (
+                  <Chip
+                    avatar={<Avatar>{selectData.name.toUpperCase()[0]+selectData.name.toUpperCase()[senderName.length-1]}</Avatar>}
+                    label={message.text}
+                    color="primary"
+                    variant="outlined"
+                    className={classes.chipLeft}
+                  />
+                )
+              })}
             </DialogContentText>
           </DialogContent>
           <AppBar className={classes.content}>

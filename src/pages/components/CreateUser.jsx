@@ -61,6 +61,8 @@ class CreateUser extends React.Component {
   handleSubmit = (e, addUser, openSnackBar) => {
     e.preventDefault();
     const { name, email } = this.state;
+    let value = [name, email]
+    localStorage.setItem("loginUser", JSON.stringify(value));
     addUser({ variables: { name, email }});
     openSnackBar('Data created successfully!', 'success');
     this.handleClose();

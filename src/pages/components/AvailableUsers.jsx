@@ -86,25 +86,28 @@ class AvailableUsers extends Component {
         {({ subscribeToMore, loading, error, data }) => {
           if (loading) return <CircularProgress className={classes.progress} size={20} />;
           if (error) return <p>{error.message}</p>;
-          const { id, name, email } = data.getAllUser[data.getAllUser.length-1];
-          let value = [id, name, email]
-          localStorage.setItem("loginUser", JSON.stringify(value));
           let loginData = JSON.parse(localStorage.getItem("loginUser"));
-          return (
-            <>
-              <TableComponent
-                id="id"
-                subscribeToMore={() => this.suscribeUser(subscribeToMore)}
-                loginData={loginData}
-                data={data}
-                onSelect={this.handleSelect}
-              />
+          console.log(loginData);
+          const loginUserData = data.getAllUser.filter(data => data.email === loginData[1]);
+          console.log('Welcome', loginUserData);
+          localStorage.setItem("loginUserID", loginUserData[0].id);
+          // let loginData = JSON.parse(localStorage.getItem("loginUser"));
+          if (open) {
+            return (
               <Messanger 
                 open={open}
                 selectData={selectData}
                 onClose={this.handleClose}
               />
-            </>
+            )
+          }
+          return (
+            <TableComponent
+              id="id"
+              subscribeToMore={() => this.suscribeUser(subscribeToMore)}
+              data={data}
+              onSelect={this.handleSelect}
+            />
           )
         }}
       </Query>

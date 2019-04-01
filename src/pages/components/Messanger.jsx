@@ -33,7 +33,7 @@ class Messanger extends Component {
 
   suscribeMessage = (subscribeToMore) => {
     const { selectData } = this.props;
-    const senderID = JSON.parse(localStorage.getItem("loginUser"))[0];
+    const senderID = JSON.parse(localStorage.getItem("loginUserID"));
     subscribeToMore ({
       document: MESSAGE_SUBSCRIPTION,
       variables: { sender: senderID, receiver: selectData.id },
@@ -50,14 +50,14 @@ class Messanger extends Component {
 
   render() {
     const { selectData, open, onClose } = this.props;
-    const senderID = JSON.parse(localStorage.getItem("loginUser"))[0];
+    const senderID = JSON.parse(localStorage.getItem("loginUserID"));
     return (
       <Query
         query={GET_MESSAGE}
         variables={{sender: senderID, receiver: selectData.id}}
       >
         {({ subscribeToMore, loading, error, data }) => {
-          if (loading) return <p>Loading...</p>;
+          if (loading) return <p>Loading...Message</p>;
           if (error) return <p>{error.message}</p>;
           return (
             <ChatDialog

@@ -43,9 +43,10 @@ class TableComponent extends Component {
   }
 
   tableBody = (data) => {
-    const { classes, onSelect, loginData } = this.props;
+    const { classes, onSelect } = this.props;
+    let loginData = JSON.parse(localStorage.getItem("loginUser"));
     return data.getAllUser.map(dataItem => {
-      if (dataItem.name !== loginData[1]) {
+      if (dataItem.name !== loginData[0]) {
         return (
           <TableRow
             key={dataItem.id}
@@ -65,14 +66,13 @@ class TableComponent extends Component {
     const {
       classes,
       data,
-      loginData
     } = this.props;
-    console.log('inside table', data.getAllUser)
+    let loginData = JSON.parse(localStorage.getItem("loginUser"));
     return (
       <>
         <div style={ { display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span style={{ color: 'black', fontSize: '25px', marginBottom: '50px' }}>
-            <h2>Welcome {loginData[1]}</h2>
+            <h2>Welcome {loginData[0]}</h2>
             <hr/>
           </span>
           <Paper className={classes.root}>
@@ -91,6 +91,5 @@ TableComponent.propTypes = {
   onSelect: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   subscribeToMore: PropTypes.func.isRequired,
-  loginData: PropTypes.func.isRequired,
 };
 export default withStyles(styles)(TableComponent);
