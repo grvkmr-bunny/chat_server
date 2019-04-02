@@ -46,7 +46,7 @@ class TableComponent extends Component {
     const { classes, onSelect } = this.props;
     let loginData = JSON.parse(localStorage.getItem("loginUser"));
     return data.getAllUser.map(dataItem => {
-      if (dataItem.name !== loginData[0]) {
+      if (dataItem.name !== loginData[1]) {
         return (
           <TableRow
             key={dataItem.id}
@@ -67,12 +67,13 @@ class TableComponent extends Component {
       classes,
       data,
     } = this.props;
-    let loginData = JSON.parse(localStorage.getItem("loginUser"));
+    const loginData = JSON.parse(localStorage.getItem("loginUser"));
+    console.log('**********************', loginData);
     return (
       <>
         <div style={ { display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span style={{ color: 'black', fontSize: '25px', marginBottom: '50px' }}>
-            <h2>Welcome {loginData[0]}</h2>
+            <h2>Welcome {loginData[1]}</h2>
             <hr/>
           </span>
           <Paper className={classes.root}>

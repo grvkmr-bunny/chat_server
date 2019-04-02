@@ -65,9 +65,10 @@ class AvailableUsers extends Component {
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
         const newData = subscriptionData.data;
-        const { id, name, email } = newData;
-        let value = [id, name, email]
-        localStorage.setItem("loginUser", JSON.stringify(value));
+        console.log('+++++++++++++++', subscriptionData.data);
+        // const { id, name, email } = newData;
+        // let value = [id, name, email]
+        // localStorage.setItem("loginUser", JSON.stringify(value));
         return {
           ...prev,
           getAllUser: [...prev.getAllUser, newData.userAdded]
@@ -86,11 +87,11 @@ class AvailableUsers extends Component {
         {({ subscribeToMore, loading, error, data }) => {
           if (loading) return <CircularProgress className={classes.progress} size={20} />;
           if (error) return <p>{error.message}</p>;
-          let loginData = JSON.parse(localStorage.getItem("loginUser"));
-          console.log(loginData);
-          const loginUserData = data.getAllUser.filter(data => data.email === loginData[1]);
-          console.log('Welcome', loginUserData);
-          localStorage.setItem("loginUserID", loginUserData[0].id);
+          // let loginData = JSON.parse(localStorage.getItem("loginUser"));
+          // console.log(loginData);
+          // const loginUserData = data.getAllUser.filter(data => data.email === loginData[1]);
+          // console.log('Welcome', loginUserData);
+          // localStorage.setItem("loginUserID", loginUserData[0].id);
           // let loginData = JSON.parse(localStorage.getItem("loginUser"));
           if (open) {
             return (

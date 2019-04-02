@@ -59,11 +59,19 @@ class CreateUser extends React.Component {
   }  
 
   handleSubmit = (e, addUser, openSnackBar) => {
+    localStorage.removeItem("loginUser");
     e.preventDefault();
     const { name, email } = this.state;
-    let value = [name, email]
-    localStorage.setItem("loginUser", JSON.stringify(value));
-    addUser({ variables: { name, email }});
+    addUser({ variables: { name, email }}).then((data) => {
+      const { id, name, email } = data.data.addUser
+      console.log('createUser**********', data, 'welcome', data.data.addUser)
+      const value = [id, name, email]
+      localStorage.setItem("loginUser", JSON.stringify(value));
+      console.log(JSON.parse(localStorage.getItem("loginUser")))
+    })
+    .catch(err => {
+      console.log("err", err)
+    });
     openSnackBar('Data created successfully!', 'success');
     this.handleClose();
     this.setState({
@@ -187,7 +195,7 @@ class CreateUser extends React.Component {
               Cancel
             </Button>
               <Mutation mutation={ADD_USER}>
-                {(addUser) => (
+                {(addUser, {data}) => (
                   <SnackBarContextConsumer>
                     {({ openSnackBar }) => (
                       <Button variant='contained' 

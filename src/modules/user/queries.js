@@ -8,8 +8,7 @@ const Query = {
   getMessage:
     (parent, { sender, receiver }) => Messages.filter(
       data => (
-        (data.sender === sender && data.receiver === receiver)
-        && (data.sender === receiver && data.receiver === sender)
+        ((data.sender === sender) && (data.receiver === receiver)) || ((data.sender === receiver) && (data.receiver === sender))
       ),
     ),
 };

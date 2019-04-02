@@ -33,13 +33,14 @@ class Messanger extends Component {
 
   suscribeMessage = (subscribeToMore) => {
     const { selectData } = this.props;
-    const senderID = JSON.parse(localStorage.getItem("loginUserID"));
+    const senderID = JSON.parse(localStorage.getItem("loginUser"))[0];
     subscribeToMore ({
       document: MESSAGE_SUBSCRIPTION,
       variables: { sender: senderID, receiver: selectData.id },
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
         const newData = subscriptionData.data;
+        console.log('Inside subscription message+++++++++++++++', newData, '********', prev);
         return {
           ...prev,
           getMessage: [...prev.getMessage, newData.messageSend]
@@ -50,7 +51,7 @@ class Messanger extends Component {
 
   render() {
     const { selectData, open, onClose } = this.props;
-    const senderID = JSON.parse(localStorage.getItem("loginUserID"));
+    const senderID = JSON.parse(localStorage.getItem("loginUser"))[0];
     return (
       <Query
         query={GET_MESSAGE}
@@ -59,6 +60,7 @@ class Messanger extends Component {
         {({ subscribeToMore, loading, error, data }) => {
           if (loading) return <p>Loading...Message</p>;
           if (error) return <p>{error.message}</p>;
+          console.log('message Dtaa----------', data);
           return (
             <ChatDialog
               subscribeToMore={() => this.suscribeMessage(subscribeToMore)}

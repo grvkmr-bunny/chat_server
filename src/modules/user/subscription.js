@@ -9,8 +9,12 @@ const Subscription = {
   messageSend: {
     subscribe: withFilter(
       () => pubsub.asyncIterator(MESSAGE_SEND),
-      (payload, variables) => payload.messageSend.sender === variables.sender
-        && payload.messageSend.receiver === variables.receiver,
+      (payload, variables) => {
+          return (
+            ((payload.messageSend.sender === variables.sender) && (payload.messageSend.receiver === variables.receiver))
+            || ((payload.messageSend.sender === variables.receiver) && (payload.messageSend.receiver === variables.sender))
+          )
+        }
     ),
   },
 };
