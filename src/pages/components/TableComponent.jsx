@@ -67,7 +67,6 @@ class TableComponent extends Component {
       data,
     } = this.props;
     const loginData = JSON.parse(localStorage.getItem("loginUser"));
-    console.log('**********************', loginData);
     return (
       <>
         <div style={ { display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

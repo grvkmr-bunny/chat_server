@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import * as ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import gql from "graphql-tag";
 import { Query, Mutation } from "react-apollo";
@@ -20,13 +21,7 @@ import Slide from '@material-ui/core/Slide';
 
 const styles = theme => ({
   root: {
-    marginTop: theme.spacing.unit,
-    overflowX: 'auto',
-    elevation: 0,
-    position: 'relative',
-  },
-  chip: {
-    margin: theme.spacing.unit,
+    // width: "100%"
   },
   content: {
     position: 'sticky',
@@ -48,16 +43,29 @@ const styles = theme => ({
     marginLeft: theme.spacing.unit,
   },
   // dialogPaper: {
-  //   // minHeight: '55vh',
-  //   // maxHeight: '55vh',
-  //   // minWidth: '40.3vh',
-  //   // maxWidth: '40.3vh',
-  // },
+    //   // minHeight: '55vh',
+    //   // maxHeight: '55vh',
+    //   // minWidth: '40.3vh',
+    //   // maxWidth: '40.3vh',
+    // },
+  chip: {
+    // width: "50%",
+    // flexShrink: 1,
+    // wordWrap: "break-word",
+  },
+  chipLabel: {
+    width: "100%",
+    wordWrap: "break-word",
+  },
   chipLeft: {
+    // flexShrink: 1,
+    // width: "50%",
     textAlign: "left",
     margin: theme.spacing.unit,
   },
   chipRight: {
+    // flexShrink: 1,
+    // width: "100%",
     textAlign: "right",
     margin: theme.spacing.unit,
   }
@@ -89,12 +97,28 @@ function Transition(props) {
 }
 
 class ChatDialog extends Component {
-  state = {
-    message: '',
-  };
+  constructor(props) {
+    super(props)
+    this.state = {
+      message: '',
+    };
+  }
 
   componentDidMount() {
     this.props.subscribeToMore();
+    this.scrollToBottom();
+  }
+
+  componentDidUpdate() {
+    this.scrollToBottom();
+  }
+
+  scrollToBottom = () => {
+    const node = ReactDOM.findDOMNode(this.messagesEnd);
+    // const node = document.getElementById("alert-dialog-description");
+    if (node) {
+      node.scrollIntoView({ behavior: "smooth" });
+    }
   }
 
   handleChange = field => event => {
@@ -102,6 +126,13 @@ class ChatDialog extends Component {
       [field]: event.target.value,
     });
   };
+
+  onPressKey = (e, sendMessage) => {
+    const x = e.key;
+    if (x === "Enter") {
+      this.handleSend(sendMessage);
+    }
+  }
 
   handleSend = (sendMessage) => {
     const { selectData } = this.props;
@@ -133,11 +164,12 @@ class ChatDialog extends Component {
           return (
             <>
               <Dialog
+                id="lastMessage"
                 fullScreen
                 open={open}
                 onClose={onClose}
-                // classes={{ paper: classes.dialogPaper }}
                 TransitionComponent={Transition}
+                className={classes.root}
               >
                 <AppBar className={classes.content}>
                   <Toolbar>
@@ -151,55 +183,61 @@ class ChatDialog extends Component {
                 </AppBar>
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
-                    {messageData.getMessage.map(message => {
-                      let receiverData;
-                      if (message.sender === senderId) {
+                    {
+                      messageData.getMessage.map(message => {
+                        let receiverData;
+                        if (message.sender === senderId) {
+                          return (
+                            <div className={classes.chipRight} ref={(div) => this.messagesEnd = div}>
+                              <Chip
+                                avatar={<Avatar>{senderName.toUpperCase()[0]+senderName.toUpperCase()[senderName.length-1]}</Avatar>}
+                                label={<div className={classes.chipLabel}>{message.text}</div>}
+                                color="primary"
+                                variant="outlined"
+                                className={classes.chip}
+                              />
+                            </div>
+                          )
+                        } else {
+                          receiverData = data.getAllUser.filter(data => data.id === message.sender);
+                        }
                         return (
-                          <div className={classes.chipRight}>
+                          <div className={classes.chipLeft} ref={(div) => this.messagesEnd = div}>
                             <Chip
-                              avatar={<Avatar>{senderName.toUpperCase()[0]+senderName.toUpperCase()[senderName.length-1]}</Avatar>}
-                              label={message.text}
+                              avatar={<Avatar>{receiverData[0].name.toUpperCase()[0]+receiverData[0].name.toUpperCase()[receiverData[0].name.length-1]}</Avatar>}
+                              label={<div className={classes.chipLabel}>{message.text}</div>}
                               color="primary"
                               variant="outlined"
+                              className={classes.chip}
                             />
                           </div>
                         )
-                      } else {
-                        // console.log('Inside 1st else', message.sender);
-                        receiverData = data.getAllUser.filter(data => data.id === message.sender);
-                        console.log('Inside 2nd else', receiverData);
-                      }
-                      return (
-                        <div className={classes.chipLeft}>
-                          <Chip
-                            avatar={<Avatar>{receiverData[0].name.toUpperCase()[0]+receiverData[0].name.toUpperCase()[receiverData[0].name.length-1]}</Avatar>}
-                            label={message.text}
-                            color="primary"
-                            variant="outlined"
-                          />
-                        </div>
-                      )
-                    })}
+                      })
+                    }
+                    {this.scrollToBottom()}
                   </DialogContentText>
                 </DialogContent>
                 <Typography className={classes.footer}>
-                  <TextField
-                    fullWidth
-                    id="filled-full-width"
-                    placeholder="Type Message"
-                    value={this.state.message}
-                    name="message"
-                    className={classes.textField}
-                    variant="filled"
-                    onChange={this.handleChange('message')}
-                  />
                   <Mutation mutation={SEND_MESSAGE}>
                     {(sendMessage, { data }) => (
-                      <Fab
-                        onClick={() => this.handleSend(sendMessage)}
-                      >
-                        <SendIcon />
-                      </Fab>
+                      <>
+                        <TextField
+                          fullWidth
+                          id="filled-full-width"
+                          placeholder="Type Message"
+                          value={this.state.message}
+                          name="message"
+                          className={classes.textField}
+                          variant="filled"
+                          onChange={this.handleChange('message')}
+                          onKeyPress={(e) => this.onPressKey(e, sendMessage)}
+                        />
+                        <Fab
+                          onClick={() => this.handleSend(sendMessage)}
+                        >
+                          <SendIcon />
+                        </Fab>
+                      </>
                     )}
                   </Mutation> 
                 </Typography>

@@ -40,7 +40,6 @@ class Messanger extends Component {
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
         const newData = subscriptionData.data;
-        console.log('Inside subscription message+++++++++++++++', newData, '********', prev);
         return {
           ...prev,
           getMessage: [...prev.getMessage, newData.messageSend]
@@ -60,7 +59,6 @@ class Messanger extends Component {
         {({ subscribeToMore, loading, error, data }) => {
           if (loading) return <p>Loading...Message</p>;
           if (error) return <p>{error.message}</p>;
-          console.log('message Dtaa----------', data);
           return (
             <ChatDialog
               subscribeToMore={() => this.suscribeMessage(subscribeToMore)}
