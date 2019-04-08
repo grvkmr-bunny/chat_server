@@ -1,7 +1,5 @@
 {
-  "presets": [
-  "env",
-  "react",
-  "stage-3",
-  ]
+  "presets": ["@babel/preset-react", "@babel/preset-env"],
+"plugins": ["@babel/plugin-proposal-class-properties","transform-strict-mode", "transform-class-properties"]
+
 }

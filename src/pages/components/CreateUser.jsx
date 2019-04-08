@@ -32,6 +32,10 @@ class CreateUser extends React.Component {
     showData: false,
     name: '',
     email: '',
+    showError: {
+      name: false,
+      email: false,
+    },
     error: {
       name: '',
       email: '',
@@ -55,6 +59,10 @@ class CreateUser extends React.Component {
         name: false,
         email: false,
       },
+      showError: {
+        name: false,
+        email: false,
+      }
     });
   }  
 
@@ -103,13 +111,16 @@ class CreateUser extends React.Component {
 
   handleError = (err) => {
     const focussederror = {};
+    const boolError = {};
     if (err) {
       err.inner.forEach((element) => {
         focussederror[element.path] = element.message;
+        boolError[element.path] = true;
       });
     }
     this.setState({
       error: focussederror,
+      showError: boolError,
     });
   }
 
@@ -146,7 +157,7 @@ class CreateUser extends React.Component {
   }
 
   render() {
-    const { open, name, email, showData } = this.state;
+    const { open, name, email, showData, showError } = this.state;
     return (
       <div>
         <Button align="center" onClick={this.handleClickOpen} variant="contained" color="primary">
@@ -168,7 +179,7 @@ class CreateUser extends React.Component {
               value={name}
               margin="normal"
               variant="outlined"
-              error={this.getError('name')}
+              error={showError.name}
               helperText={this.getError('name')}
               onChange={this.handleChange('name')}
               onBlur={this.isTouched('name')}
@@ -182,7 +193,7 @@ class CreateUser extends React.Component {
               value={email}
               margin="normal"
               variant="outlined"
-              error={this.getError('email')}
+              error={showError.email}
               helperText={this.getError('email')}
               onChange={this.handleChange('email')}
               onBlur={this.isTouched('email')}

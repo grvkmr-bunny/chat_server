@@ -88,7 +88,7 @@ TableComponent.propTypes = {
   classes: PropTypes.objectOf.isRequired,
   data: PropTypes.arrayOf.isRequired,
   onSelect: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired,
+  // onClick: PropTypes.func.isRequired,
   subscribeToMore: PropTypes.func.isRequired,
 };
 export default withStyles(styles)(TableComponent);
